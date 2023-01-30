@@ -12,6 +12,8 @@ class chessGraph{
             [-2, 1],
             [-2, -1]
         ]
+        this.createVertices();
+        this.createEdges();
     }
 
     createVertices(){
@@ -35,7 +37,7 @@ class chessGraph{
                 let newI = i + this.MOVEVARIANTS[moveVariant][0];
                 let newJ = j + this.MOVEVARIANTS[moveVariant][1];
 
-                if(!(newI > 8 || newJ > 8 || newI < 0 || newJ < 0)){
+                if(!(newI >= 8 || newJ >= 8 || newI < 0 || newJ < 0)){
                     arr.push([newI,newJ]);
                 }
             }
@@ -44,32 +46,31 @@ class chessGraph{
     }
 
     knightMoves(startCoord, endCoord){
+        const visitedCoords = [];
+        const queue = [];
         endCoord = `${endCoord[0]},${endCoord[1]}`
-        let visitedCoords = [];
-        let queue = [];
-        queue.push(startCoord);
-        visitedCoords.push(startCoord);
-
+        queue.push([startCoord, [startCoord]]);
         while(queue.length > 0){
-            let currentCoord = queue.pop();
-            //console.log(this.board.get(currentCoord)); // NEED TO REPLACE
-
-            for(let value of this.board.get(currentCoord)){
-                console.log(value);
+            let coord = queue.shift();
+            let currentCoord = coord[0];
+            let path = coord[1];
+            currentCoord = `${currentCoord[0]},${currentCoord[1]}`;
+            visitedCoords.push(currentCoord);
+            if(currentCoord === endCoord){
+                return path;
+            }
+            const neighbours = this.board.get(currentCoord);
+            for(let neighbour of neighbours){
+                if(!visitedCoords.includes(neighbour)){
+                    queue.push([neighbour, [...path, neighbour]]);
+                }
             }
         }
     }
 }
 
 let graph = new chessGraph(8);
-graph.createVertices();
-graph.createEdges();
-graph.knightMoves("0,0", [2,3]);
-
-/*
-
-for(let [key, value] of graph.board){
-    console.log(key, value)
-}
-
-*/
+let path = graph.knightMoves([0, 0], [6, 2]);
+console.log(`It would take ${path.length - 1} moves to get from 0,0 to 4,2 !`)
+console.log(`You would follow the route:`)
+for(let coord of path){ console.log(coord) }
